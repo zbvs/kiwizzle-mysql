@@ -1,0 +1,5 @@
+[mysqld]
+default-time-zone = '+09:00'
+innodb_ft_enable_stopword = 0
+ngram_token_size = 2
+ft_min_word_len=2

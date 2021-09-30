@@ -1,0 +1,207 @@
+#os.system(""" mysql -u "root" -p  < ./recreate.sql """)
+
+
+
+CREATE DATABASE IF NOT EXISTS `kiwizzle`;
+
+CREATE USER IF NOT EXISTS 'kiwizzle'@'%' IDENTIFIED BY 'kiwizzle';
+GRANT ALL PRIVILEGES ON kiwizzle.* TO 'kiwizzle'@'%';
+
+############################################################################<<
+#DROP EXISTING
+DROP PROCEDURE IF EXISTS `kiwizzle`.`INIT_PROCEDURE`;
+
+DELIMITER $$
+CREATE PROCEDURE `kiwizzle`.`INIT_PROCEDURE`(OUT execute_result  VARCHAR(20))
+BEGIN
+
+    IF (SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'kiwizzle') THEN
+        SET FOREIGN_KEY_CHECKS = 0;
+		SET @tables = NULL;
+		SELECT GROUP_CONCAT('`', table_schema, '`.`', table_name, '`') INTO @tables
+		FROM information_schema.tables
+		WHERE table_schema = 'kiwizzle';
+		SET @tables = CONCAT('DROP TABLE ', @tables);
+        PREPARE    stmt FROM @tables;
+		EXECUTE    stmt;
+		SELECT * FROM information_schema.tables WHERE table_schema = 'kiwizzle';
+		SET FOREIGN_KEY_CHECKS = 1;
+        SET execute_result = "EXECUTED";
+	ELSE
+		SET execute_result = "NOT EXECUTED";
+    END IF;
+END$$
+DELIMITER ;
+
+CALL `kiwizzle`.`INIT_PROCEDURE`(@result);
+SELECT @result;
+############################################################################>>
+
+CREATE TABLE IF NOT EXISTS `kiwizzle`.`company_category` (
+    category_id BIGINT PRIMARY KEY,
+    category_name VARCHAR(64) NOT NULL
+);
+
+INSERT INTO `kiwizzle`.`company_category` (category_id, category_name) values (1, "플랫폼/포털");
+INSERT INTO `kiwizzle`.`company_category` (category_id, category_name) values (2, "게임사");
+
+CREATE TABLE IF NOT EXISTS `kiwizzle`.`company` (
+    company_id BIGINT PRIMARY KEY,
+    company_name VARCHAR(64) NOT NULL,
+    parent_id BIGINT,
+    is_group BOOLEAN,
+    category_id BIGINT,
+    is_permitted  BOOLEAN,
+    FOREIGN KEY(parent_id) REFERENCES `kiwizzle`.`company`(company_id) ON DELETE RESTRICT,
+    FOREIGN KEY(category_id) REFERENCES `kiwizzle`.`company_category`(category_id) ON DELETE RESTRICT
+);
+
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (100, "Naver*", NULL, True, 1, True);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (101, "Naver", 100, False, 1, True);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (102, "Naver Webtoon", 100, False, 1, True);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (103, "Naver Cloud", 100, False, 1, True);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (104, "Snow", 100, False, 1, True);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (105, "Works Mobile", 100, False, 1, True);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (106, "Naver Financial", 100, False, 1, True);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (107, "Naver Labs", 100, False, 1, True);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (200, "Kakao*", NULL, True, 1, True);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (201, "Kakao", 200, False, 1, True);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (202, "Kakao Bank", 200, False, 1, True);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (203, "Kakao Entertainment", 200, False, 1, True);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (204, "Kakao Mobility", 200, False, 1, True);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (205, "Kakao Pay", 200, False, 1, True);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (206, "Kakao Games", 200, False, 1, True);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (207, "Kakao Commerce", 200, False, 1, True);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (208, "Kakao Enterprise", 200, False, 1, True);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (209, "Kakao Brain", 200, False, 1, True);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (299, "Kakao Others", 200, False, 1, True);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (300, "Line", NULL, False, 1, True);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (400, "Coupang", NULL, False, 1, False);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (500, "Baemin", NULL, False, 1, False);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (600, "Toss", NULL, False, 1, False);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (700, "Yanolja", NULL, False, 1, False);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (800, "Danggn Market", NULL, False, 1, False);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (900, "Delivery Hero", NULL, False, 1, False);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (1000, "Zigbang", NULL, False, 1, False);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (1100, "Bank Salad", NULL, False, 1, False);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (1200, "Hyperconnect", NULL, False, 1, False);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (1300, "NHN", NULL, False, 1, False);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (1400, "Socar", NULL, False, 1, False);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (1500, "Watcha", NULL, False, 1, False);
+
+
+
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (10000100, "NCSoft", NULL, False, 2, False);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (10000200, "Nexon", NULL, False, 2, False);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (10000300, "NetMarble", NULL, False, 2, False);
+INSERT INTO `kiwizzle`.`company` (company_id, company_name, parent_id, is_group, category_id, is_permitted) values (10000400, "Krafton", NULL, False, 2, False);
+
+
+CREATE TABLE IF NOT EXISTS `kiwizzle`.`position` (
+    position_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    position_name VARCHAR(64) UNIQUE NOT NULL
+);
+
+
+INSERT INTO `kiwizzle`.`position` (position_name) values ("Embedded/Hardware");
+INSERT INTO `kiwizzle`.`position` (position_name) values ("DevOps Engineer");
+INSERT INTO `kiwizzle`.`position` (position_name) values ("Scraping Engineer");
+INSERT INTO `kiwizzle`.`position` (position_name) values ("iOS Developer");
+INSERT INTO `kiwizzle`.`position` (position_name) values ("Android Developer");
+INSERT INTO `kiwizzle`.`position` (position_name) values ("QA Engineer");
+INSERT INTO `kiwizzle`.`position` (position_name) values ("Frontend");
+INSERT INTO `kiwizzle`.`position` (position_name) values ("Backend/Server");
+INSERT INTO `kiwizzle`.`position` (position_name) values ("Web/FullStack");
+INSERT INTO `kiwizzle`.`position` (position_name) values ("DBA/DB Engineer");
+INSERT INTO `kiwizzle`.`position` (position_name) values ("Security Engineer");
+INSERT INTO `kiwizzle`.`position` (position_name) values ("AR/VR");
+INSERT INTO `kiwizzle`.`position` (position_name) values ("AI NLP");
+INSERT INTO `kiwizzle`.`position` (position_name) values ("AI VISION");
+INSERT INTO `kiwizzle`.`position` (position_name) values ("AI ML/DL");
+INSERT INTO `kiwizzle`.`position` (position_name) values ("Data Scientist");
+INSERT INTO `kiwizzle`.`position` (position_name) values ("Data Analyst");
+INSERT INTO `kiwizzle`.`position` (position_name) values ("Data Engineer");
+INSERT INTO `kiwizzle`.`position` (position_name) values ("Infra/System/Network");
+INSERT INTO `kiwizzle`.`position` (position_name) values ("Software Engineer");
+INSERT INTO `kiwizzle`.`position` (position_id, position_name) values (-1, "ETC");
+
+
+CREATE TABLE IF NOT EXISTS `kiwizzle`.`language` (
+    language_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    language_name VARCHAR(64) UNIQUE NOT NULL
+);
+
+INSERT INTO `kiwizzle`.`language` (language_name) values ("Java/Spring");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("Java/Android");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("Java");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("Kotlin/Spring");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("Kotlin/Android");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("Kotlin");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("Docker/Kubernetes");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("Docker");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("AWS");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("GCP");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("AZURE");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("Terraform");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("Ansible");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("Swift/iOS");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("Objective-C/iOS");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("iOS");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("Python/ML");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("Python/Web");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("Python");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("C/C++");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("Javascript/React");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("Javascript/Angular");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("Javascript/Vue");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("Javascript/JQuery");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("Javascript/html");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("Javascript/nodejs");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("Javascript");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("Typescript");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("C#/ASP.NET");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("C#");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("Golang");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("Scala");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("PHP");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("Ruby");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("RDBMS");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("NOSQL");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("HBase");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("KAFKA");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("RabbitMQ");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("TensorFlow");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("PyTorch");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("Hadoop");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("Hive");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("Spark");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("Redis");
+INSERT INTO `kiwizzle`.`language` (language_name) values ("Elasticsearch");
+INSERT INTO `kiwizzle`.`language` (language_id, language_name) values (-1,"ETC");
+
+
+
+CREATE TABLE IF NOT EXISTS `kiwizzle`.`job_description` (
+    description_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    company_id BIGINT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    type VARCHAR(16) NOT NULL,
+    content MEDIUMTEXT NOT NULL,
+    text_content MEDIUMTEXT NOT NULL,
+    least_experience INT,
+    recommend_experience INT,
+    url VARCHAR(1024) NOT NULL,
+    department VARCHAR(64) NOT NULL,
+    start_date DATETIME NOT NULL,
+    end_date DATETIME,
+    expired_date DATETIME,
+    description_hash VARCHAR(64)  UNIQUE NOT NULL,
+    is_expired BOOLEAN,
+    tag VARCHAR(512) NOT NULL,
+    FOREIGN KEY(company_id) REFERENCES `kiwizzle`.`company`(company_id) ON DELETE RESTRICT    
+
+);
+
+CREATE FULLTEXT index job_search_index_both ON `kiwizzle`.`job_description` (title , text_content) WITH parser ngram;
+CREATE FULLTEXT index job_search_index_title ON `kiwizzle`.`job_description` (title) WITH parser ngram;
+
