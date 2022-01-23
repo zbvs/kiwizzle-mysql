@@ -86,8 +86,7 @@ CREATE TABLE IF NOT EXISTS `kiwizzle`.`job_description` (
     type VARCHAR(16) NOT NULL,
     content MEDIUMTEXT NOT NULL,
     text_content MEDIUMTEXT NOT NULL,
-    least_experience INT,
-    recommend_experience INT,
+    experience INT,
     url VARCHAR(1024) NOT NULL,
     department VARCHAR(64) NOT NULL,
     start_date DATETIME NOT NULL,
@@ -96,13 +95,15 @@ CREATE TABLE IF NOT EXISTS `kiwizzle`.`job_description` (
     expiry_date DATETIME,
     description_hash VARCHAR(64)  UNIQUE NOT NULL,
     is_expired BOOLEAN,
-    tag VARCHAR(512) NOT NULL,
+    
+    KEY dao_query_index (is_expired, company_id, experience, registration_date, end_date),
     CONSTRAINT foreign_company_key FOREIGN KEY(company_id) REFERENCES `kiwizzle`.`company`(company_id) 
         ON UPDATE CASCADE
         ON DELETE RESTRICT    
 
 );
 
-CREATE FULLTEXT index job_search_index_title ON `kiwizzle`.`job_description` (title) WITH parser ngram;
-CREATE FULLTEXT index job_search_index_text_content ON `kiwizzle`.`job_description` (text_content) WITH parser ngram;
+
+# CREATE FULLTEXT index job_search_index_title ON `kiwizzle`.`job_description` (title) WITH parser ngram;
+# CREATE FULLTEXT index job_search_index_text_content ON `kiwizzle`.`job_description` (text_content) WITH parser ngram;
 
